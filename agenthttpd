@@ -1,0 +1,19 @@
+pipeline {
+    agent {
+        label 'umar'
+    }
+
+    stages {
+        stage('Hello') {
+            steps {
+                sh 'yum install httpd -y'
+            }
+        }
+        
+        stage('start') {
+            steps {
+                sh ''' systemctl start httpd '''
+            }
+        }
+    }
+}
