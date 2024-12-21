@@ -1,0 +1,44 @@
+pipeline {
+    agent { label 'umar' }  // Use the agent named 'umar'
+    environment {
+        GIT_REPO = 'https://github.com/umar-fayaaz/jenkinsdockerimage.git'
+        DOCKER_IMAGE = 'umarfayaaz/throughjenkins1:latest' // Docker Hub repository and tag
+    }
+    stages {
+        stage('Clone Repository') {
+            steps {
+                // Clone the GitHub repository
+                sh 'git clone ${GIT_REPO}'
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                // Navigate to the cloned repository directory
+                dir('jenkinsdockerimage') { // Adjust this directory name if it's different
+                    sh "docker build -t ${DOCKER_IMAGE} ."
+                }
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
+                    script {
+                        // Secure Docker login using Jenkins credentials
+                        sh "echo ${DOCKERHUB_PASSWORD} | docker login -u ${DOCKERHUB_USERNAME} --password-stdin"
+
+                        // Push the Docker image to Docker Hub
+                        sh "docker push ${DOCKER_IMAGE}"
+                    }
+                }
+            }
+        }
+    }
+    post {
+        success {
+            echo 'Pipeline completed successfully! The Docker image is now available on Docker Hub.'
+        }
+        failure {
+            echo 'Pipeline failed. Check the logs for more details.'
+        }
+    }
+}
