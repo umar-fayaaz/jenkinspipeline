@@ -1,0 +1,15 @@
+pipeline {
+    agent { label 'umar2' }
+
+    stages {
+        stage('Ping Google') {
+            steps {
+                script {
+                    // Define the variable explicitly if needed
+                    def result = sh(script: 'ping -c 4 google.com', returnStdout: true).trim()
+                    echo "Ping result: ${result}"
+                }
+            }
+        }
+    }
+}
